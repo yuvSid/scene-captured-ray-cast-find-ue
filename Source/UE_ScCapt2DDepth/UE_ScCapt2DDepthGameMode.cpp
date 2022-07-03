@@ -12,4 +12,6 @@ AUE_ScCapt2DDepthGameMode::AUE_ScCapt2DDepthGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+
+	
 }
