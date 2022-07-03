@@ -5,6 +5,7 @@
 
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Kismet/KismetRenderingLibrary.h"
 
 FVector ASceneCaptureCalcPos::CalculateDepthFromClippedPos(const FVector2D clippedPos)
 {
@@ -16,19 +17,20 @@ FVector ASceneCaptureCalcPos::CalculateDepthFromClippedPos(const FVector2D clipp
 																	+ FString(" clippedPos:") + clippedPos.ToString());
 
 	FMatrix projectionMatrix = viewInfo.CalculateProjectionMatrix().Inverse();
-	FVector spawnPoint = FVector(1., 1., 0.);
+	FVector spawnPoint(clippedPos, 1.);
 	projectionMatrix.TransformPosition(spawnPoint);
 	spawnPoint.Normalize();
 	
 	
-	auto RenderTargetResource = GetCaptureComponent2D()->TextureTarget->GameThread_GetRenderTargetResource();
+	// read depth from depth map by UV coordinate
+	UTextureRenderTarget2D *pTexture = GetCaptureComponent2D()->TextureTarget.Get();
+	FLinearColor pixelColor = UKismetRenderingLibrary::ReadRenderTargetRawUV(GetWorld(), pTexture,
+													clippedPos.X / static_cast< float >(pTexture->SizeX),
+													clippedPos.Y / static_cast< float >(pTexture->SizeY),
+													false);
+	//TODO clippedPos need to be recalculated to UV coordinates [0,1]
 
-	if (RenderTargetResource)
-	{
-		TArray<FFloat16Color> buffer;
-		RenderTargetResource->ReadFloat16Pixels(buffer);
-		spawnPoint = buffer[0].A.GetFloat() * spawnPoint;
-	}
+	spawnPoint *= pixelColor.A;
 
 	return spawnPoint;
 }
