@@ -17,6 +17,5 @@ class UE_SCCAPT2DDEPTH_API ASceneCaptureCalcPos : public ASceneCapture2D
 
 public:
 	UFUNCTION(BlueprintCallable)
-		virtual FVector CalculateDepthFromClippedPos(const FVector2D clippedPos);
-	
+		virtual FVector CalculateDepthFromClippedPos(const FVector2D& normalizedPos);	
 };
